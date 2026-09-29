@@ -1,0 +1,6 @@
+packages:
+  - "blockchain-engine"
+  - "blockchain-api"
+allowBuilds:
+  bcrypt: true
+  unrs-resolver: true
