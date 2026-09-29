@@ -1,0 +1,522 @@
+phase 0 : Building Blockchain Engine
+phase 1 : Learn Backend (NestJs)
+phase 2 : Database
+phase 3 : Frontend
+phase 4 : Connet Frontend + backend
+phase 5 : Authentication
+phase 6 : Real-Time Updates
+phase 7 : Docker & Deployment
+------------------------------------------------------------------------
+
+Phase 0 :
+
+Module 0 : Environment Setup
+Module 1 : Learn TypeScript
+Module 2 : Design the Blockchain Engine
+Module 3 : Implement the Blockchain Engine
+Module 4 : Testing                                       
+                                       
+                    ---------------------------------------------------------------------
+                                        Module 0 : Environment Setup
+                    ----------------------------------------------------------------------
+1. npm init - y 
+    initialize node project. package.json contains all the information about the project. every node project has one.
+
+2. npm install -D typescript
+    -D : --save-dev : this package is only needed while depeloping
+    => nodes_modules : where npm stores every installed packages
+
+3. npx tsc --init
+    => typescript configuration
+    => creates tsconfig.json : tells the typescript compiler how to convert .ts file into .js
+    => why we need .js? because, browser and node.js execute .js files not typescript.
+
+now we paste the following code in tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "strict": true,
+
+    "esModuleInterop": true,
+
+    "skipLibCheck": true
+  }
+}
+here,   target          : javascript version to generate
+        module          : module system CommonJS works good with node.js
+        rootDir         : src code lives here
+        outDir          : where .js code will be written
+        strict          : Enables strict type checking to catch bugs early
+        esModuleInterop : makes importing CommonJS modules easiers
+        skipLibCheck    : speed up compilation by skipping checks on library declaration files
+    
+4. npm install -D @types/node
+    install node.js type definition. automatically typescript does not know about node.js api's like console, process, or fs
+
+
+
+                            -------------------------------------------------------
+                                        Module 1 : Learning Typescript
+                            -------------------------------------------------------
+
+Lesson 1
+Variables & Types
+        ↓
+Lesson 2
+Functions
+        ↓
+Lesson 3
+Arrays & Objects
+        ↓
+Lesson 4
+Interfaces
+        ↓
+Lesson 5
+Classes
+
+what is the diff between Interfaces and Classes???
+    Interfaces : tells us this object must have these properties
+    Classes : tells us this object has these properties AND these behaviors
+        ↓
+Lesson 6
+Inheritance
+        ↓
+Lesson 7
+Generics
+        ↓
+Lesson 8
+Modules
+        ↓
+Lesson 9
+Enums
+        ↓
+Lesson 10
+Async Programming
+
+
+                                    ---------------------------------------------
+                                                Module 2 : System Design
+                                    ---------------------------------------------
+Blockchain      has         Blocks
+Blocks          has         Transactions
+Transactions    signed by   wallets
+
+
+
+=> installing crypto-js
+    npm install crypto-js
+    npm install -D @types/crypto-js
+
+=> run index.ts:
+        npx tsc
+        node .\dist\index.js
+
+==> why we need hashing?
+        to check if the is tempered with or not.
+==> why we need signature?
+        to check who created the data.
+
+==> private key signs the Transactions
+        Transactions -> private key -> signature
+==> public key? 
+        if only varify the Transaction. 
+        Transaction + signature + public key -> valid? -> true\false
+so, 
+        private key     ->      signature
+        public key      ->      varify
+
+=> now, do we signature the entire Transaction?
+- no, we sign the hash, because the entire Transaction is large, and it will be slow to sign this. 
+so we sign the hash (which is unique for each transaction), and does our job perfectly.
+
+finally, 
+        transaction -> SHA256 -> hash -> private key -> signature
+varification, (each node get : Transaction , signature, public key)
+        transaction -> hash -> public key -> verify signature
+
+now desgin, 
+        do transaction need to know how the signature is done?
+        no, so we will use signature utility to calculate this  :       signature.ts
+
+
+        install elliptic:
+        npm install elliptic
+        npm install -D @types/elliptic
+
+# what is a wallet?
+stores coin? no. coins are in Blockchain. 
+wallet only proves the ownership of account/coins in the Blockchain.
+
+==> wallet has one responsibility -> managing indentity.
+here we will provide transaction to wallet and it will sign the transaction and then return the signed transaction
+
+
+==> transaction knows everything. so it should keep the responsibility of validating itself.
+it is called encapsulation.
+
+
+==> proof of work (pow):
+        nothing but changing hash to be started with a fixed number of zero;
+        but prevhash, timestamp, transaction are fixed. so we need something that may change. 
+        and it is nonce.
+
+
+
+
+
+==> jest Testing
+npm install --save-dev jest ts-jest @types/jest
+
+npx ts-jest config:init // initialize
+
+npm run test:coverage
+
+
+
+
+-----------------------------------
+Backend Engineering
+-----------------------------------
+
+Part 1
+Backend Fundamentals
+        │
+        ▼
+Part 2
+HTTP & REST APIs
+        │
+        ▼
+Part 3
+NestJS Fundamentals
+        │
+        ▼
+Part 4
+Project Setup
+        │
+        ▼
+Part 5
+Dependency Injection
+        │
+        ▼
+Part 6
+Controllers
+        │
+        ▼
+Part 7
+Services
+        │
+        ▼
+Part 8
+Integrate Blockchain Engine
+        │
+        ▼
+Part 9
+DTOs & Validation
+        │
+        ▼
+Part 10
+Error Handling
+        │
+        ▼
+Part 11
+Swagger Documentation
+        │
+        ▼
+Part 12
+Testing the Backend APIs
+
+
+API : Application Programming Interface
+
+
+An HTTP request contains followings:
+1. method
+2. path
+3. header
+4.body (sometimes)
+
+1. method:
+ GET -> read
+ POST -> create
+ PUT -> Update
+ DELETE -> Delete
+
+ 2. path
+ GET /wallets/abc123/balance
+
+ 3. header
+ extra information about the request.
+ e.g., Content-Type: application/json --> The request body is json
+
+ HTTP Response:
+ e.g.,
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "balance": 150
+}
+| Code | Meaning                                |
+| ---: | -------------------------------------- |
+|  200 | Success                                |
+|  201 | Resource created                       |
+|  400 | Bad request (client sent invalid data) |
+|  401 | Unauthorized                           |
+|  404 | Resource not found                     |
+|  500 | Internal server error                  |
+
+
+Controller:
+1. receive request
+2. extract data from request
+3. call the appropriate Service
+4. return the Response.
+
+Service:
+contains business logic
+1. create a wallet
+2. submit transaction
+3. mine pending transaction
+4. calculate a wallet balance
+
+module:
+groups related Functionallity together
+
+Wallet Module
+ ├── Wallet Controller
+ ├── Wallet Service
+
+Blockchain Module
+ ├── Blockchain Controller
+ ├── Blockchain Service
+
+architecture:
+                 Browser
+                   │
+                   ▼
+          HTTP Request
+                   │
+                   ▼
+        BlockchainController
+                   │
+                   ▼
+        BlockchainService
+                   │
+                   ▼
+        Blockchain Engine
+                   │
+         Block • Transaction • Wallet
+
+Bootstrap functino:
+
+
+         Start Application
+
+↓
+
+Load Modules
+
+↓
+
+Create Services
+
+↓
+
+Create Controllers
+
+↓
+
+Start Server
+
+↓
+
+Ready
+
+
+
+
+main.ts = entry point of the application
+nestfactory = creates the nestjs application
+appmodule = blueprint of the application
+Bootstrap() = initializes the application
+app = represents the running application
+app.listen() = starts http server and begins accepting request
+
+
+
+app.module.ts :
+
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+@Module({ // decorator, metadata that tells nestjs how to build the application
+  imports: [], // what other module does this module depend on
+  controllers: [AppController], // these controllers belong to this module
+  providers: [AppService], // These classes can be created and injected where needed.
+})
+export class AppModule {}
+// appmodule is like a map
+// a container that groups everything realted to the feature
+
+
+---------------------------------
+Dependency Injection
+---------------------------------
+NestJS
+
+↓
+
+Creates AppService
+
+↓
+
+Creates AppController
+
+↓
+
+Injects AppService
+
+
+
+
+-----------------------------------
+work following
+----------------------------------
+You
+
+↓
+
+Write AppService
+
+↓
+
+Register Provider
+
+↓
+
+NestJS
+
+↓
+
+Creates Object
+
+↓
+
+Injects Object
+
+↓
+
+Controller Uses It
+
+
+nestjs -> creates Blockchain service -> Injects it -> Controller uses it
+
+
+
+The controller stays focused on handling HTTP requests, while the service encapsulates the business logic.
+
+
+
+when we start the application: 
+pnpm run start:dev
+
+↓
+
+main.ts
+
+↓
+
+NestFactory
+
+↓
+
+AppModule
+
+↓
+
+Read providers
+
+↓
+
+Create AppService
+
+↓
+
+Read controllers
+
+↓
+
+Create AppController
+
+↓
+
+Inject AppService
+
+↓
+
+Start HTTP Server
+
+
+---------------------------------------------------------------------------------------
+Start Application
+
+↓
+
+main.ts
+
+↓
+
+NestFactory.create(AppModule)
+
+↓
+
+NestJS reads AppModule
+
+↓
+
+Registers all Providers into the DI Container
+
+↓
+
+Creates instances (when needed, or eagerly depending on configuration)
+
+↓
+
+Injects them into Controllers/other Providers
+
+↓
+
+Starts HTTP Server
+
+
+
+appmodule does not create anything, it Registers what exists and DI container manages the cretion and Injection
+
+
+=> The controller receives the http request
+
+
+
+
+---------------------------------------------
+module creation:
+npx nest g module blockchain
+
+controller creation: 
+npx nest g co blockchain
+
+service creation:
+npx nest g s blockchain
+
+run server:
+pnpm run start:dev
+
+
+
+=> services are singletons
